@@ -1,0 +1,54 @@
+<script src="/socket.io/socket.io.js"></script>
+<canvas id="game"></canvas>
+<br><br>
+<input id="message" type="text"></input>
+<script>
+
+	var keybinds = {
+		"up" : 38,
+		"down" : 40,
+		"left" : 37,
+		"right" : 39
+	}
+	
+	var keybindArray = Object.keys( keybinds );
+	var controls = {};
+	
+	for( var i = 0; i < keybindArray.length; i++ ) {
+		controls[ keybindArray[ i ] ] = false;
+	}
+	
+	/*
+		{
+			"up" : false,
+			"down" : false,
+			"left" : false,
+			"right" : false
+		}
+	*/
+	
+	function keyUpdate( e, state ) {
+		for( var i = 0; i < keybindArray.length; i++ ) {
+			if( keybinds[ keybindArray[ i ] ] == e.keyCode ) {
+				controls[ keybindArray[ i ] ] = state;
+			}
+		}
+	}
+	
+	window.addEventListener( "keydown", function( e ) {
+		keyUpdate( e, true );
+	}, false );
+
+	window.addEventListener( "keyup", function( e ) {
+		keyUpdate( e, false );
+	}, false );
+	
+	var c = document.getElementById( "game" );
+	var ctx = c.getContext( "2d" );
+	function main() {
+		requestAnimationFrame( main );
+		ctx.clearRect( 0, 0, c.width, c.height );
+	}
+	main();
+	
+</script>

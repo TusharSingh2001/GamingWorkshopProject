@@ -1,0 +1,106 @@
+<script src="/socket.io/socket.io.js"></script>
+<canvas id="game"></canvas>
+<br><br>
+<form onsubmit="return formsubmit()">
+	<input id="message" type="text"></input>
+</form>
+<div id="messagelog"></div>
+<script>
+
+	var socket = io.connect( "localhost:8080" );
+
+	var clients = {};
+
+	var keybinds = {
+		"up" : 38,
+		"down" : 40,
+		"left" : 37,
+		"right" : 39
+	}
+	
+	var keybindArray = Object.keys( keybinds );
+	var controls = {};
+	
+	for( var i = 0; i < keybindArray.length; i++ ) {
+		controls[ keybindArray[ i ] ] = false;
+	}
+	
+	/*
+		{
+			"up" : false,
+			"down" : false,
+			"left" : false,
+			"right" : false
+		}
+	*/
+	
+	function keyUpdate( e, state ) {
+		for( var i = 0; i < keybindArray.length; i++ ) {
+			if( keybinds[ keybindArray[ i ] ] == e.keyCode ) {
+				controls[ keybindArray[ i ] ] = state;
+			}
+		}
+	}
+
+	function formsubmit() {
+		console.log( "Submitting" );
+		socket.emit( "message", document.getElementById( "message" ).value );
+		return false;
+	}
+
+	socket.on( "messagelog", function( data ) {
+		document.getElementById( "messagelog" ).innerHTML += "<br>" + data;
+	} );
+
+	// { id : "Guest2", position : { x : 3, y : 5 } }
+	socket.on( "gameloop", function( data ) {
+		clients[ data.id ] = data.position;
+		clients[ data.id ].color = data.color;
+	} );
+
+	/*
+		clients = {
+			"Guest 2" : {
+				x : 3,
+				y : 5,
+				color : 234523
+			}
+		}
+		clients[ "Guest 2" ];
+	*/
+	socket.on( "clear", function( data ) {
+		if( clients[ data ] != undefined ) {
+			delete clients[ data ];
+		}
+	} );
+	
+	window.addEventListener( "keydown", function( e ) {
+		keyUpdate( e, true );
+	}, false );
+
+	window.addEventListener( "keyup", function( e ) {
+		keyUpdate( e, false );
+	}, false );
+	
+	var c = document.getElementById( "game" );
+	var ctx = c.getContext( "2d" );
+
+	function main() {
+		requestAnimationFrame( main );
+		ctx.clearRect( 0, 0, c.width, c.height );
+
+		var keys = Object.keys( clients );
+		// keys = [ "Guest 2", "Guest 3" ]
+		for( var i = 0; i < keys.length; i++ ) {
+			var id = keys[ i ];
+			var pos = clients[ id ];
+			console.log( pos.color );
+			ctx.fillStyle = "#" + pos.color;
+			ctx.fillRect( pos.x, pos.y, 30, 30 );
+		}
+
+		socket.emit( "controls", controls );
+	}
+	main();
+	
+</script>
