@@ -4,6 +4,7 @@ This gaming application was created while watching the gaming workshop conducted
 basic rendering, netcode, and movement.
 
 Technology Used: Visual Studio Code, Node js
+
 Programming Language Used: HTML, JavaScript
 
 Here is the link of the gaming workhop:
